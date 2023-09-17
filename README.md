@@ -2,6 +2,8 @@
 
 This lets you record redis streams and commands so that you can replay them easily at a later time.
 
+Under the hood, it uses [mcap](https://mcap.dev/docs/python/) as a storage format.
+
 ## Getting Started - Using Python
 
 To install the redis-record package:
