@@ -1,0 +1,8 @@
+fastapi
+python-multipart
+strawberry-graphql
+websockets
+redis
+orjson
+gunicorn
+uvicorn
