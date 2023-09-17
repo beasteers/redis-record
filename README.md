@@ -26,7 +26,17 @@ To replay the file into the system, do:
 python -m redis_record.replay my_recording
 ```
 
-### List
+### What did I record last week?
+
+List recording names.
+```bash
+python -m redis_record list
+```
+
+Get info about a recording.
+```bash
+python -m redis_record info my_recording
+```
 
 ## Getting Started - Using Docker
 
@@ -35,10 +45,15 @@ The recorder is designed to be a long-running process, meaning that you can depl
 This is useful if you want to be able to control the recording remotely and always have the data save to the same place.
 
 ```bash
+git clone https://github.com/beasteers/redis-record.git
+cd redis-record
+
 docker-compose up -d
 # to observe the recording process
 docker logs redis-record
 ```
+
+### Record
 
 To start a recording, do:
 ```bash
@@ -50,6 +65,8 @@ To stop a recording, do:
 python -m redis_record stop my_second_recording
 ```
 
+### Replay
+
 Currently, the replay container isn't a long-running container so you still need to invoke it like above:
 ```bash
 python -m redis_record.replay my_recording
@@ -59,6 +76,8 @@ python -m redis_record.replay my_recording
 
 The previous method is designed to capture XADD commands (data added to Redis streams). If you want to capture 
 other redis commands, we can leverage Redis's MONITOR command to capture all commands.
+
+### Record
 
 ```bash
 python redis_record.record.monitor my_other_recording
@@ -72,10 +91,13 @@ python redis_record.record.monitor my_other_recording --record-cmds '[xadd,set]'
 ```
 I was initially going to just do `[xadd,set]` but figured trying to cover a more general use case as a default would be better.
 
+
+### Replay
+
 To replay:
 
 ```bash
-python redis_record.record.monitor my_other_recording
+python redis_record.replay.monitor my_other_recording
 ```
 
 ## TODOs
