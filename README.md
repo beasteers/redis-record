@@ -6,8 +6,7 @@ This lets you record redis streams and commands so that you can replay them easi
 
 To install the redis-record package:
 ```bash
-git clone https://github.com/beasteers/redis-record.git
-pip install -e ./redis-record
+pip install https://github.com/beasteers/redis-record.git
 ```
 
 ### Record
