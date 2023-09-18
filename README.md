@@ -11,6 +11,15 @@ To install the redis-record package:
 pip install git+https://github.com/beasteers/redis-record.git
 ```
 
+### Configuring your environment
+
+By default, we assume that redis is accessible via localhost:6379, but if that's not the case you can change that quite easily.
+```bash
+export REDIS_HOST=localhost
+export REDIS_PORT=6379
+```
+Each command can also accept `--host localhost --port 6379` arguments as well.
+
 ### Record
 
 To start an on-demand recording:
