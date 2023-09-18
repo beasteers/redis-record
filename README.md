@@ -8,7 +8,7 @@ Under the hood, it uses [mcap](https://mcap.dev/docs/python/) as a storage forma
 
 To install the redis-record package:
 ```bash
-pip install https://github.com/beasteers/redis-record.git
+pip install git+https://github.com/beasteers/redis-record.git
 ```
 
 ### Record
