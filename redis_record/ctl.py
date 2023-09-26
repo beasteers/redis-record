@@ -13,9 +13,9 @@ def stop_monitor(r):
 def start_recording(r, name, timestamp=None):
     return r.xadd(RECORD_KEY, {RECORD_XADD_DATA_FIELD: name}, id=timestamp or '*', maxlen=RECORD_NAME_MAXLEN)
 
-def stop_record(r, timestamp=None):
+def stop_recording(r, timestamp=None):
     return r.xadd(RECORD_KEY, {RECORD_XADD_DATA_FIELD: ''}, id=timestamp or '*', maxlen=RECORD_NAME_MAXLEN)
-
+stop_record = stop_recording
 
 
 
