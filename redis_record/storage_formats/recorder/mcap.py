@@ -4,10 +4,12 @@ import os
 import time
 import json
 import tqdm
+import base64
 from mcap.writer import Writer
+from .base import BaseRecorder
 
 
-class Recorder:
+class MCAPRecorder(BaseRecorder):
     def __init__(self, schema=None, out_dir='.'):
         self.out_dir = out_dir
         self.writer = self.fhandle = None
@@ -22,7 +24,7 @@ class Recorder:
 
     def ensure_writer(self, record_name, force=False):
         if self.writer is not None and force:
-            self.close_writer()
+            self.close()
 
         if self.writer is None:
             # create new writer
@@ -50,7 +52,8 @@ class Recorder:
                 message_encoding="json",
             )
 
-    def write(self, timestamp, channel='all', **data):
+    def write(self, timestamp, channel='all', *, stream_id, data):
+        data = {'stream_id': stream_id, 'data': prepare_data(data)}
         self.writer.add_message(
             channel_id=self.channel_ids[channel],
             log_time=time.time_ns(),
@@ -77,6 +80,10 @@ def read(fname):
         # print(summary)
         for schema, channel, message in reader.iter_messages():
             print(f"{channel.topic} ({schema.name}): {message.data}")
+
+
+def prepare_data(data):
+    return {k.decode(): base64.b64encode(v).decode() for k, v in data.items()}
 
 
 

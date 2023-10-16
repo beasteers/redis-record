@@ -7,7 +7,7 @@ import tqdm
 import redis
 
 from .. import util
-from .recorder import Recorder
+from ..storage_formats.recorder import get_recorder
 from ..config import *
 from .. import ctl
 
@@ -16,7 +16,7 @@ def record(
         name=None, stream_ids='*', ignore_streams=[], 
         record_key=RECORD_KEY, out_dir=RECORDING_DIR, 
         stream_refresh=3000, data_block=1000, wait_block=3000, no_streams_sleep=1000,
-        single_recording=None,
+        single_recording=None, recording_type='mcap',
         host=HOST, port=PORT, db=DB
 ):
     '''Record redis streams to file.
@@ -45,7 +45,7 @@ def record(
     r = redis.Redis(host=host, port=port, db=db)
     pbar = tqdm.tqdm()
     try:
-        with Recorder(out_dir=out_dir) as rec, r:
+        with get_recorder(recording_type, out_dir=out_dir) as rec, r:
             # initialize cursor
             cursor = {s: '$' for s in stream_ids}
             rec_cursor = {record_key: '0'}
@@ -93,7 +93,7 @@ def record(
                                                     break
                                                 # write data
                                                 pbar.set_description(f'{sid} {t}')
-                                                rec.write(util.parse_epoch_time(t), sid, **prepare_data(x))
+                                                rec.write(util.parse_epoch_time(t), sid, stream_id=sid, data=x)
                                                 pbar.update()
 
                                         # update cursor to only include active streams
@@ -146,15 +146,11 @@ def record(
                     rec.ensure_channel(sid)
                     for t, x in xs:
                         pbar.set_description(f'{sid} {t}')
-                        rec.write(util.parse_epoch_time(t), sid, stream_id=sid, data=prepare_data(x))
+                        rec.write(util.parse_epoch_time(t), sid, stream_id=sid, data=x)
                         pbar.update()
     finally:
         if single_recording:
             ctl.stop_recording(r)
-
-
-def prepare_data(data):
-    return {k.decode(): base64.b64encode(v).decode() for k, v in data.items()}
 
 
 def cli():

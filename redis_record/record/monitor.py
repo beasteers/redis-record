@@ -8,7 +8,7 @@ import redis
 from redis.client import Monitor as Monitor_
 
 from .. import util
-from .recorder import Recorder
+from ..storage_formats.recorder import get_recorder
 from ..config import *
 from .. import ctl
 
@@ -45,7 +45,11 @@ class Monitor(Monitor_):
 
 
 
-def record(name=None, record_key=MONITOR_KEY, record_cmds=MONITOR_CMDS, out_dir=RECORDING_DIR, single_recording=None, host=HOST, port=PORT, db=DB):
+def record(
+        name=None, record_key=MONITOR_KEY, record_cmds=MONITOR_CMDS, 
+        out_dir=RECORDING_DIR, single_recording=None, recording_type='mcap',
+        host=HOST, port=PORT, db=DB,
+    ):
     '''Record all commands using MONITOR command.
     
     Arguments:
@@ -64,7 +68,7 @@ def record(name=None, record_key=MONITOR_KEY, record_cmds=MONITOR_CMDS, out_dir=
 
     r = redis.Redis(host=host, port=port, db=db, decode_responses=False)
     try:
-        with Recorder(schema={ "cmd": { "type": "array" } }, out_dir=out_dir) as rec, r:
+        with get_recorder(recording_type, schema={ "cmd": { "type": "array" } }, out_dir=out_dir) as rec, r:
             if record_name:
                 ctl.start_monitoring(r, record_name)
 
