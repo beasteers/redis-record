@@ -1,7 +1,7 @@
 import os
 import glob
 import zipfile
-from queue import PriorityQueue
+import queue
 
 from redis_record.util import parse_epoch_time
 
@@ -12,7 +12,7 @@ class ZipPlayer:
         self.file_index = {}
         self.zipfh = {}
         self.last_timestamps = {}
-        self.queue = PriorityQueue()
+        self.queue = queue.PriorityQueue()
 
         self._load_file_index()
         for stream_id in self.file_index:
@@ -24,21 +24,25 @@ class ZipPlayer:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
-    
+    def next_message(self):
+        # get next message
+        _, (stream_id, ts) = self.queue.get(block=False)
+
+        # load data
+        with self.zipfh[stream_id].open(ts, 'r') as f:
+            data = f.read()
+        tx = parse_epoch_time(ts)
+        # possibly load next file
+        if ts >= self.last_timestamps[stream_id]:
+            self._queue_next_file(stream_id)
+        return stream_id, tx, {'d': data}
+
     def iter_messages(self):
-        while True:
-            # get next message
-            _, (stream_id, ts) = self.queue.get()
-
-            # load data
-            with self.zipfh[stream_id].open(ts, 'r') as f:
-                data = f.read()
-            tx = parse_epoch_time(ts)
-            yield stream_id, tx, {'d': data}
-
-            # possibly load next file
-            if ts >= self.last_timestamps[stream_id]:
-                self._queue_next_file(stream_id)
+        try:
+            while True:
+                yield self.next_message()
+        except queue.Empty:
+            pass
 
     def close(self):
         for zf in self.zipfh.values():

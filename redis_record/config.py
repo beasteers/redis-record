@@ -6,7 +6,7 @@ MONITOR_KEY = os.getenv("RECORD_MONITOR_KEY") or 'RECORD:NAME'
 MONITOR_CMDS = (os.getenv("RECORD_MONITOR_CMDS") or _all_set_cmds).split("+")
 
 
-
+REPLAY_KEY = os.getenv("REPLAY_STREAMS_KEY") or 'XREPLAY:NAME'
 RECORD_KEY = os.getenv("RECORD_STREAMS_KEY") or 'XRECORD:NAME'
 RECORD_XADD_DATA_FIELD = (os.getenv("RECORD_STREAMS_DATA_KEY") or 'd').encode()
 RECORD_NAME_MAXLEN = int(os.getenv("RECORD_NAME_MAXLEN") or 100)
