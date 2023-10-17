@@ -10,7 +10,7 @@ from redis_record.util import parse_epoch_time
 class ZipPlayer:
     def __init__(self, path, recording_dir, stream_filter=None):
         self.recording_dir = path if os.path.exists(path) else os.path.join(recording_dir, path)
-        self.stream_filter = stream_filter
+        self.stream_filter = stream_filter if isinstance(stream_filter, (list, tuple, set)) else [stream_filter] if stream_filter else []
         self.file_index = {}
         self.zipfh = {}
         self.last_timestamps = {}
@@ -56,7 +56,7 @@ class ZipPlayer:
         self.file_index = {
             stream_id: sorted(glob.glob(os.path.join(self.recording_dir, stream_id, '*.zip')))
             for stream_id in os.listdir(self.recording_dir)
-            if not self.stream_filter or fnmatch(stream_id, self.stream_filter)
+            if not self.stream_filter or any(fnmatch(stream_id, p) for p in self.stream_filter)
         }
 
     def _queue_next_file(self, stream_id):
