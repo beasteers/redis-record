@@ -56,7 +56,7 @@ class MCAPRecorder(BaseRecorder):
         self.ensure_channel(stream_id)
         data = {'stream_id': stream_id, 'data': prepare_data(data)}
         self.writer.add_message(
-            channel_id=self.channel_ids[channel],
+            channel_id=self.channel_ids[stream_id],
             log_time=time.time_ns(),
             data=json.dumps(data).encode("utf-8"),
             publish_time=int(timestamp * 10e9),
