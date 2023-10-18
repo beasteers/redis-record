@@ -118,10 +118,9 @@ def record(
                         sid = b'::'.join(cmd_items[:2]).decode()
                     else:
                         sid = cmd_items[0].decode()
-                    rec.ensure_channel(sid)
 
                     # write command to file
-                    rec.write(data['time'], sid, **prepare_data(cmd_items))
+                    rec.write(sid, data['time'], prepare_data(cmd_items))
                     pbar.update()
     finally:
         if single_recording:

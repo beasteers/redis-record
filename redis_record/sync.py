@@ -1,10 +1,12 @@
 import time
+import datetime
 
 
 class Sync:
-    def __init__(self, speed_fudge=1):
+    def __init__(self, speed_fudge=1, warn_above=10):
         self.speed_fudge = speed_fudge
         self.t0 = self.tproc = self.tpub0 = self.tpub = 0
+        self.warn_above = warn_above
 
     def clear(self):
         self.t0 = self.tproc = self.tpub0 = self.tpub = 0
@@ -28,6 +30,10 @@ class Sync:
     def sync(self, timestamp):
         delay = self.wait_time(timestamp)
         if delay:
+            if delay > self.warn_above:
+                print(
+                    f"\n\nWarning: sleeping for {delay:.3f} seconds. \n"
+                    f"Simulating {datetime.datetime.fromtimestamp(self.tpub).strftime('%H:%M:%S.%f')} - {datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S.%f')}")
             time.sleep(delay / self.speed_fudge)
         
         # update for next iteration

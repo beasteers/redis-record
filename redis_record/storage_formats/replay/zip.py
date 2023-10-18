@@ -28,6 +28,9 @@ class ZipPlayer:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
+    def __iter__(self):
+        yield from self.iter_messages()
+
     def seek(self, timestamp):
         self.close()  # TODO: do this more efficiently. the problem is selectively clearing the queue.
         for sid, fs in self.file_index.items():

@@ -14,9 +14,10 @@ class ZipRecorder(BaseRecorder):
         self.recording_dir = None
         self.writer = None
 
-    def write(self, timestamp, channel='all', *, data, stream_id=None):
+    def write(self, stream_id, timestamp, data):
         assert set(data) == {b'd'}, f"zip recorder can only record a single field in a stream. got {set(data)}"
-        self.writer[stream_id or channel].write(data[b'd'], format_epoch_time(timestamp))
+        self.ensure_channel(stream_id)
+        self.writer[stream_id].write(data[b'd'], format_epoch_time(timestamp))
 
     def close(self):
         if self.writer:

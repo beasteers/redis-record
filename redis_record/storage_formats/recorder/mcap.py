@@ -7,7 +7,7 @@ import tqdm
 import base64
 from mcap.writer import Writer
 from .base import BaseRecorder
-
+from ...config import DEFAULT_CHANNEL
 
 class MCAPRecorder(BaseRecorder):
     def __init__(self, schema=None, out_dir='.'):
@@ -43,7 +43,7 @@ class MCAPRecorder(BaseRecorder):
                 data=json.dumps({"type": "object", **kw}).encode(),
             )
 
-    def ensure_channel(self, channel='all'):
+    def ensure_channel(self, channel=DEFAULT_CHANNEL):
         if channel not in self.channel_ids:
             tqdm.tqdm.write(f"opening channel {channel}")
             self.channel_ids[channel] = self.writer.register_channel(
@@ -52,7 +52,8 @@ class MCAPRecorder(BaseRecorder):
                 message_encoding="json",
             )
 
-    def write(self, timestamp, channel='all', *, stream_id, data):
+    def write(self, stream_id, timestamp, data):
+        self.ensure_channel(stream_id)
         data = {'stream_id': stream_id, 'data': prepare_data(data)}
         self.writer.add_message(
             channel_id=self.channel_ids[channel],

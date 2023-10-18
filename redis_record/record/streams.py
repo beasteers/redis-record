@@ -99,7 +99,6 @@ def record(
                                         results, cursor = util.read_next(r, cursor, block=data_block)
                                         result_sids = {s for s, x in results if x}
                                         for sid, xs in results:
-                                            rec.ensure_channel(sid)
                                             for t, x in xs:
                                                 # the data is from after the recording ended.
                                                 if util.parse_epoch_time(t) > tstamp:
@@ -107,7 +106,7 @@ def record(
                                                     break
                                                 # write data
                                                 pbar.set_description(f'{sid} {t}')
-                                                rec.write(util.parse_epoch_time(t), sid, stream_id=sid, data=x)
+                                                rec.write(sid, util.parse_epoch_time(t), x)
                                                 pbar.update()
 
                                         # update cursor to only include active streams
@@ -155,12 +154,11 @@ def record(
 
                 # read data from redis and write to file
                 results, cursor = util.read_next(r, cursor, block=data_block)
+                rec.ensure_writer(record_name)
                 for sid, xs in results:
-                    rec.ensure_writer(record_name)
-                    rec.ensure_channel(sid)
                     for t, x in xs:
                         pbar.set_description(f'{sid} {t}')
-                        rec.write(util.parse_epoch_time(t), sid, stream_id=sid, data=x)
+                        rec.write(sid, util.parse_epoch_time(t), data=x)
                         pbar.update()
     finally:
         if single_recording:

@@ -18,6 +18,9 @@ class MCAPPlayer:
     def __exit__(self, exc_type, exc_value, trace):
         self.fh.close()
 
+    def __iter__(self):
+        yield from self.iter_messages()
+
     it = None
     def iter_messages(self):
         if self.it is None:
