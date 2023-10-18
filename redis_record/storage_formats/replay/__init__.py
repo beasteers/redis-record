@@ -1,7 +1,7 @@
+from redis_record.config import STORAGE_FORMAT
 
 
-
-def get_player(type, *a, **kw):
+def get_player(*a, type=STORAGE_FORMAT, **kw):
     # XXX: not extensible
     if type == 'mcap':
         from .mcap import MCAPPlayer

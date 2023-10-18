@@ -5,8 +5,9 @@ from mcap.reader import make_reader
 
 
 class MCAPPlayer:
-    def __init__(self, name, recording_dir) -> None:
+    def __init__(self, name, recording_dir, subset=None) -> None:
         self.path = name if os.path.isfile(name) else os.path.join(recording_dir, f'{name}.mcap')
+        self.subset = subset
 
     def __enter__(self):
         self.fh = open(self.path, "rb")
@@ -20,7 +21,7 @@ class MCAPPlayer:
     it = None
     def iter_messages(self):
         if self.it is None:
-            self.it = iter(self.reader.iter_messages())
+            self.it = iter(self.reader.iter_messages(topics=self.subset))
         for schema, channel, message in self.it:
             yield self._parse_message(message)
 

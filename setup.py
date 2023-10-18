@@ -3,14 +3,14 @@ import setuptools
 setuptools.setup(
     name='redis_record',
     version='0.0.1',
-    description='redis streams library',
+    description='redis streams recordings',
     long_description=open('README.md').read().strip(),
     long_description_content_type='text/markdown',
     author='Bea Steers',
     author_email='bea.steers@gmail.com',
-    url=f'https://github.com/VIDA-NYU/redis-streamer',
+    url=f'https://github.com/beasteers/redis-record',
     packages=setuptools.find_packages(),
-    entry_points={'console_scripts': ['redisstreamer=redis_streamer.cli:main']},
+    entry_points={'console_scripts': ['redis-record=redis_record.cmd:cli']},
     install_requires=[
         'redis', 'mcap', 'orjson', 'tqdm', 'fire',
     ],

@@ -10,7 +10,7 @@ from redis.client import Monitor as Monitor_
 from .. import util
 from ..storage_formats.recorder import get_recorder
 from ..config import *
-from .. import ctl
+from .. import cmd
 
 
 
@@ -68,9 +68,9 @@ def record(
 
     r = redis.Redis(host=host, port=port, db=db, decode_responses=False)
     try:
-        with get_recorder(recording_type, schema={ "cmd": { "type": "array" } }, out_dir=out_dir) as rec, r:
+        with get_recorder(type=recording_type, schema={ "cmd": { "type": "array" } }, out_dir=out_dir) as rec, r:
             if record_name:
-                ctl.start_monitoring(r, record_name)
+                cmd.start_monitoring(r, record_name)
 
             with Monitor(r.connection_pool) as m:
                 # look up the initial recording name
@@ -125,7 +125,7 @@ def record(
                     pbar.update()
     finally:
         if single_recording:
-            ctl.stop_monitoring(r)
+            cmd.stop_monitoring(r)
 
 
 def prepare_data(cmd_items):
@@ -133,7 +133,7 @@ def prepare_data(cmd_items):
 
 
 
-def cli():
+def cmd():
     import fire
     fire.Fire(record)
 
@@ -142,6 +142,6 @@ if __name__ == '__main__':
     p = Profiler()
     try:
         with p:
-            cli()
+            cmd()
     finally:
         p.print()

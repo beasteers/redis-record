@@ -1,2 +1,2 @@
-from .ctl import cli
+from .cmd import cli
 cli()

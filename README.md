@@ -115,5 +115,3 @@ python redis_record.replay.monitor my_other_recording
  - recording expiration (auto-stop a recording after e.g. 1 minute of inactivity)
  - s3 recording file storage
  - alternative exporters - e.g. mp4 - but would need consistent/general format.
- - persistent replay container - replay key controller
- - replay lock - don't allow two concurrent replays

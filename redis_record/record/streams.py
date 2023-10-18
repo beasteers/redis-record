@@ -9,14 +9,16 @@ import redis
 from .. import util
 from ..storage_formats.recorder import get_recorder
 from ..config import *
-from .. import ctl
+from .. import cmd
 
 
 def record(
         name=None, stream_ids='*', ignore_streams=[], 
-        record_key=RECORD_KEY, out_dir=RECORDING_DIR, 
+        record_key=RECORD_KEY, 
+        pause_key=RECORD_PAUSE_KEY,
+        out_dir=RECORDING_DIR, 
         stream_refresh=3000, data_block=1000, wait_block=3000, no_streams_sleep=1000,
-        single_recording=None, recording_type='mcap',
+        single_recording=None, recording_type=STORAGE_FORMAT,
         host=HOST, port=PORT, db=DB
 ):
     '''Record redis streams to file.
@@ -42,13 +44,17 @@ def record(
     tqdm.tqdm.write(f"Streams: {stream_ids}. Stream Patterns: {stream_patterns}")
     assert stream_ids or stream_patterns
 
+    if ignore_streams is not False:
+        ignore_streams = list(ignore_streams) + list(IGNORE_STREAMS)
+
     r = redis.Redis(host=host, port=port, db=db)
     pbar = tqdm.tqdm()
+    paused = False
     try:
-        with get_recorder(recording_type, out_dir=out_dir) as rec, r:
+        with get_recorder(type=recording_type, out_dir=out_dir) as rec, r:
             # initialize cursor
             cursor = {s: '$' for s in stream_ids}
-            rec_cursor = {record_key: '0'}
+            rec_cursor = {record_key: '0', pause_key: '0'}
             
             # initialize recording state
             record_start_timestamp = None
@@ -56,7 +62,7 @@ def record(
                 record_start_timestamp = util.format_epoch_time(time.time())
                 rec_cursor[record_key] = record_start_timestamp
                 tqdm.tqdm.write(f"Starting recording: {record_name}")
-                ctl.start_recording(r, record_name, record_start_timestamp)
+                cmd.start_recording(r, record_name, record_start_timestamp)
 
             t0s = 0
             while True:
@@ -67,10 +73,18 @@ def record(
 
                 # check for recording changes
                 for sid, xs in results:
-                    if sid == record_key:
+                    # check for pause command
+                    if sid == pause_key:
                         for t, x in xs[-1:]:
+                            paused = int(x[b'd'].decode() if x else None or 0)
+                            for c in cursor:
+                                cursor[c] = t
+                    # check for recording name command
+                    if sid == record_key:
+                        for t, d in xs[-1:]:
                             # get new recording name
-                            x = (x.get(b'd') or b'').decode() or None
+                            x = (d.get(b'd') or b'').decode() or None
+                            paused = int(d.get(b'paused', b'').decode() or 0)
 
                             if record_name != x:  # idempotent
 
@@ -110,7 +124,7 @@ def record(
                                 tqdm.tqdm.write(f'{"new recording:" if record_name else "ended recording"}: {record_name} {record_start_timestamp}')
 
                 # no recording...
-                if not record_name:
+                if not record_name or paused:
                     continue
 
                 # --------------------------- Query for new streams -------------------------- #
@@ -150,7 +164,7 @@ def record(
                         pbar.update()
     finally:
         if single_recording:
-            ctl.stop_recording(r)
+            cmd.stop_recording(r)
 
 
 def cli():

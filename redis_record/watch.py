@@ -1,5 +1,4 @@
 import redis
-import mcap
 from redis_record.record.monitor import Monitor
 from .config import *
 

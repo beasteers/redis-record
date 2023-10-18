@@ -7,14 +7,14 @@ class Sync:
         self.t0 = self.tproc = self.tpub0 = self.tpub = 0
 
     def clear(self):
-        self.t0 = self.tproc = self.tpub0 = self.tpub = None
+        self.t0 = self.tproc = self.tpub0 = self.tpub = 0
 
     def start(self, timestamp):
         self.t0 = self.tproc = time.time()
         self.tpub0 = self.tpub = timestamp
 
     def wait_time(self, timestamp):
-        if self.t0 is None:
+        if self.t0 == 0:
             self.start(timestamp)
 
         ti = time.time()
@@ -35,12 +35,13 @@ class Sync:
         self.tproc = time.time()
 
 
-class Timer(Sync):
+class Clock(Sync):
     def __init__(self, rate=None):
-        self.delta = 1/rate
+        self.delta = 1/rate if rate else 0
         super().__init__()
 
     def wait_time(self, timestamp=None):
+        if not self.delta: return 0
         return super().wait_time(self.tpub + self.delta)
     
     def sync(self, timestamp=None):
@@ -49,3 +50,16 @@ class Timer(Sync):
     def nowait_sync(self, timestamp=None):
         if not self.wait_time(timestamp):
             self.sync(timestamp)
+
+
+
+if __name__ == '__main__':
+    def test(rate=3):
+        import tqdm
+        pbar = tqdm.tqdm()
+        sync = Clock(rate)
+        while True:
+            pbar.update()
+            sync.sync()
+    import fire
+    fire.Fire(test)

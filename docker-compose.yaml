@@ -30,15 +30,16 @@ services:
 
   # Remove this if you already have a redis instance
   redis:
-    image: redis:7
+    image: redis/redis-stack
     container_name: redis
     restart: unless-stopped
     ports:
       - 6379:6379
-    volumes:
-      - ./redis/redis_6789.conf:/usr/local/etc/redis/redis.conf
-    environment:
-      ALLOW_EMPTY_PASSWORD: 'yes'
+      - 8001:8001
+    # volumes:
+    #   - ./redis/redis_6789.conf:/usr/local/etc/redis/redis.conf
+    # environment:
+    #   ALLOW_EMPTY_PASSWORD: 'yes'
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping healthcheck | grep healthcheck"]
       start_period: 10s
