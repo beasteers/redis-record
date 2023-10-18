@@ -2,7 +2,7 @@
 
 This lets you record redis streams and commands so that you can replay them easily at a later time.
 
-Under the hood, it uses [mcap](https://mcap.dev/docs/python/) as a storage format.
+Under the hood, it uses [mcap](https://mcap.dev/docs/python/) or zip files as a storage format.
 
 ## Getting Started - Using Python
 
@@ -110,6 +110,20 @@ To replay:
 ```bash
 python redis_record.replay.monitor my_other_recording
 ```
+
+## Zip Format
+The directory structure is as follows:
+```
+recordings/
+  my_recording/
+    data_stream_1/
+      12345678-0_12456789-0.zip
+      12456789-0_12567890-0.zip
+      ...
+    my_other_stream/
+      ...
+```
+Inside the zipped files have the redis timestamp as the filename and the data is the serialized bytes of the `'d'` key in the stream.
 
 ## TODOs
  - recording expiration (auto-stop a recording after e.g. 1 minute of inactivity)
