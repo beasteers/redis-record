@@ -2,10 +2,11 @@ import os
 import json
 import base64
 from mcap.reader import make_reader
+from redis_record.config import RECORDING_DIR
 
 
 class MCAPPlayer:
-    def __init__(self, name, recording_dir, subset=None) -> None:
+    def __init__(self, name, recording_dir=RECORDING_DIR, subset=None) -> None:
         self.path = name if os.path.isfile(name) else os.path.join(recording_dir, f'{name}.mcap')
         self.subset = subset
 

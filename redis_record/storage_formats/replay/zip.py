@@ -5,11 +5,17 @@ import queue
 from fnmatch import fnmatch
 
 from redis_record.util import parse_epoch_time
+from redis_record.config import RECORDING_DIR
+
+import logging
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 
 class ZipPlayer:
-    def __init__(self, path, recording_dir, subset=None):
-        self.recording_dir = path if os.path.exists(path) else os.path.join(recording_dir, path)
+    def __init__(self, path, recording_dir=RECORDING_DIR, subset=None):
+        self.recording_dir = path if recording_dir is None else os.path.join(recording_dir, path)
         self.subset = subset if isinstance(subset, (list, tuple, set)) else [subset] if subset else []
         self.file_index = {}
         self.file_cursor = {}
@@ -46,7 +52,9 @@ class ZipPlayer:
             _, (stream_id, ts) = self.queue.get(block=False)
             tx = parse_epoch_time(ts)
             if tx >= self.time_cursor or 0:
+                # log.debug("using timestamp: %s", ts)
                 break
+            # log.debug("skipping timestamp: %s", ts)
 
         # load data
         self.time_cursor = tx
@@ -84,7 +92,9 @@ class ZipPlayer:
             for stream_id in os.listdir(self.recording_dir)
             if not self.subset or any(fnmatch(stream_id, p) for p in self.subset)
         }
-        self.file_cursor = {s: 0 for s in self.file_index}
+        self.file_cursor = {s: -1 for s in self.file_index}
+        log.debug('File Index: %s', self.file_index)
+        log.debug('File Cursor: %s', self.file_cursor)
 
     def _queue_next_file(self, stream_id):
         self._queue_file(stream_id, self.file_cursor[stream_id] + 1)
@@ -92,23 +102,45 @@ class ZipPlayer:
     def _queue_file(self, stream_id, index):
         # close previous file
         if self.zipfh.get(stream_id) is not None:
+            log.debug("closing opened file: %s", stream_id)
             self.zipfh.pop(stream_id).close()
         # check if we're done with this stream
         if index >= len(self.file_index[stream_id]):
+            log.debug("finished stream: %s", stream_id)
             return
         
         # load the zipfile
         fname, _, _ = self.file_index[stream_id][index]
+        log.debug("queueing file: %s", fname)
         self.file_cursor[stream_id] = index
         self.zipfh[stream_id] = zf = zipfile.ZipFile(fname, 'r', zipfile.ZIP_STORED, False)
         # load the file list
-        ts = sorted(zf.namelist())
+        ts = sorted(set(zf.namelist()))
         if not ts:
+            log.debug("no data in file: %s", fname)
             self.zipfh[stream_id].close()
             return 
         self.file_end_timestamps[stream_id] = ts[-1]
 
         # queue up the timestamps
+        log.debug("putting %d timestamps - up to %s", len(ts), ts[-1])
         for t in ts:
             tx = parse_epoch_time(t)
             self.queue.put((int(tx*1e6), (stream_id, t)))
+
+
+def replay(name, *a, **kw):
+    with ZipPlayer(name, *a, **kw) as player:
+        for sid, t, data in player.iter_messages():
+            logging.info('%s %s %s', sid, t, data)
+
+def cli():
+    import logging
+    from tqdm.contrib.logging import logging_redirect_tqdm
+    import fire
+    logging.basicConfig(level=logging.DEBUG)
+    with logging_redirect_tqdm():
+        fire.Fire(replay)
+
+if __name__ == '__main__':
+    cli()

@@ -6,10 +6,11 @@ FROM python:3.10-slim
 #     && pip install --upgrade pip \
 #     && rm -rf /var/lib/apt/lists/*
 
+ENV REDIS_HOST redis
 WORKDIR /src
 
 # install
-ADD setup.py .
+ADD setup.py README.md ./
 ADD ./redis_record/__init__.py redis_record/__init__.py
 RUN pip install -e .
 ADD ./redis_record /src/redis_record

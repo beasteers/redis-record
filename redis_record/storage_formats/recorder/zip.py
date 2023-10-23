@@ -6,7 +6,7 @@ from ...util import format_epoch_time
 MB = 1024 * 1024
 
 class ZipRecorder(BaseRecorder):
-    def __init__(self, out_dir, max_len=1000, max_size=9.5*MB):
+    def __init__(self, out_dir='.', max_len=1000, max_size=9.5*MB):
         super().__init__()
         self.out_dir = out_dir
         self.max_len = max_len
@@ -32,6 +32,7 @@ class ZipRecorder(BaseRecorder):
             self.writer = {}
             self.recording_dir = os.path.join(self.out_dir, record_name)
             os.makedirs(self.recording_dir, exist_ok=True)
+        return self
 
     def ensure_channel(self, channel):
         if channel not in self.writer:

@@ -42,6 +42,7 @@ class MCAPRecorder(BaseRecorder):
                 encoding="jsonschema",
                 data=json.dumps({"type": "object", **kw}).encode(),
             )
+        return self
 
     def ensure_channel(self, channel=DEFAULT_CHANNEL):
         if channel not in self.channel_ids:
@@ -72,6 +73,11 @@ class MCAPRecorder(BaseRecorder):
 
 
 
+def prepare_data(data):
+    return {k.decode(): base64.b64encode(v).decode() for k, v in data.items()}
+
+
+
 def read(fname):
     from mcap.reader import make_reader
     with open(fname, "rb") as f:
@@ -81,11 +87,6 @@ def read(fname):
         # print(summary)
         for schema, channel, message in reader.iter_messages():
             print(f"{channel.topic} ({schema.name}): {message.data}")
-
-
-def prepare_data(data):
-    return {k.decode(): base64.b64encode(v).decode() for k, v in data.items()}
-
 
 
 def cli():
