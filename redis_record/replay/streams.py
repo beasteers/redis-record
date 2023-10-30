@@ -6,7 +6,7 @@ import logging
 from ..config import *
 from ..util import read_latest
 from ..sync import Sync
-from ..storage_formats.replay import get_player
+from ..storage.replay import get_player
 
 log = logging.getLogger(__name__)
 

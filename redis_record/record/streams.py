@@ -7,7 +7,7 @@ import tqdm
 import redis
 
 from .. import util
-from ..storage_formats.recorder import get_recorder
+from ..storage.recorder import get_recorder
 from ..config import *
 from .. import cmd
 

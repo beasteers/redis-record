@@ -8,7 +8,7 @@ import redis
 from redis.client import Monitor as Monitor_
 
 from .. import util
-from ..storage_formats.recorder import get_recorder
+from ..storage.recorder import get_recorder
 from ..config import *
 from .. import cmd
 
