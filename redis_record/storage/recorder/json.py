@@ -7,9 +7,10 @@ from ...util import move_with_suffix
 
 class JsonRecorder(BaseRecorder):
     recording_dir = ''
-    def __init__(self, out_dir='.'):
+    def __init__(self, out_dir='.', list_key='data'):
         self.out_dir = out_dir
         self.writer = {}
+        self.list_key = list_key
 
     def __enter__(self):
         return self
@@ -50,10 +51,11 @@ class JsonRecorder(BaseRecorder):
             try:
                 if isinstance(d, bytes):
                     d = orjson.loads(d)
-                if not isinstance(d, dict):
-                    d = {'data': d}
-                if 'timestamp' not in d:
-                    d['timestamp'] = ts
+                if self.list_key:
+                    if not isinstance(d, dict):
+                        d = {self.list_key: d}
+                    if 'timestamp' not in d:
+                        d['timestamp'] = ts
             except Exception:
                 print("error reading data")
                 print(d)
