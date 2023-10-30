@@ -8,7 +8,24 @@ Under the hood, it uses [mcap](https://mcap.dev/docs/python/) or zip files as a 
 
 To install the redis-record package:
 ```bash
-pip install git+https://github.com/beasteers/redis-record.git
+pip install redis_record
+```
+
+### Iterating over a recording
+
+```python
+from redis_record.storage import get_player
+
+# open your recording
+recording_dir = 'my-recordings'
+name = 'my-favorite-recording'
+with get_player(name, recording_dir) as player:
+    # you can read messages like this
+    stream_id, timestamp, data_bytes = player.next_message()
+
+    # or just iterate over them like this
+    for stream_id, timestamp, data_bytes in player:
+        ...
 ```
 
 ### Configuring your environment
