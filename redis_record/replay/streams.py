@@ -86,13 +86,14 @@ def replay(
             if seek:
                 player.seek(seek)
         
-        try:
-            stream_id, ts, data = player.next_message()
-        except (StopIteration, queue.Empty): # fixme
+
+        msg = player.next_message()            
+        if msg is None:
             log.info(f"Finished replaying recording: {record_name}")
             record_name = None
             r.xadd(replay_key, {b'd': b''}, '*')
             continue
+        stream_id, ts, data = msg
 
         if realtime:
             sync.sync(ts)

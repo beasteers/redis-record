@@ -32,7 +32,10 @@ class MCAPPlayer:
     def next_message(self):
         if self.it is None:
             self.it = iter(self.reader.iter_messages())
-        schema, channel, message = next(self.it)
+        try:
+            schema, channel, message = next(self.it)
+        except StopIteration:
+            return
         return self._parse_message(message)
 
     def _parse_message(self, message):

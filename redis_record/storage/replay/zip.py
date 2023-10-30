@@ -14,7 +14,7 @@ log.setLevel(logging.DEBUG)
 
 
 class ZipPlayer:
-    def __init__(self, path, recording_dir=RECORDING_DIR, subset=None):
+    def __init__(self, path, recording_dir=RECORDING_DIR, subset=None, raw_timestamp=None):
         self.recording_dir = path if recording_dir is None else os.path.join(recording_dir, path)
         self.subset = subset if isinstance(subset, (list, tuple, set)) else [subset] if subset else []
         self.file_index = {}
@@ -23,6 +23,7 @@ class ZipPlayer:
         self.zipfh = {}
         self.file_end_timestamps = {}
         self.queue = queue.PriorityQueue()
+        self.raw_timestamp = raw_timestamp
 
         self._load_file_index()
         for stream_id in self.file_index:
@@ -49,7 +50,10 @@ class ZipPlayer:
     def next_message(self):
         # get next message
         while True:
-            _, (stream_id, ts) = self.queue.get(block=False)
+            try:
+                _, (stream_id, ts) = self.queue.get(block=False)
+            except queue.Empty:
+                return
             tx = parse_epoch_time(ts)
             if tx >= self.time_cursor or 0:
                 # log.debug("using timestamp: %s", ts)
@@ -63,14 +67,14 @@ class ZipPlayer:
         # possibly load next file
         if ts >= self.file_end_timestamps[stream_id]:
             self._queue_next_file(stream_id)
+        tx = ts if self.raw_timestamp else tx
         return stream_id, tx, {'d': data}
 
     def iter_messages(self):
-        try:
-            while True:
-                yield self.next_message()
-        except queue.Empty:
-            pass
+        msg = self.next_message()
+        while msg:
+            yield msg
+            msg = self.next_message()
 
     def close(self):
         self.time_cursor = 0
