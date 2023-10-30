@@ -8,6 +8,7 @@ import base64
 from mcap.writer import Writer
 from .base import BaseRecorder
 from ...config import DEFAULT_CHANNEL
+from ...util import move_with_suffix
 
 class MCAPRecorder(BaseRecorder):
     def __init__(self, schema=None, out_dir='.'):
@@ -30,6 +31,7 @@ class MCAPRecorder(BaseRecorder):
             # create new writer
             os.makedirs(self.out_dir or '.', exist_ok=True)
             self.fname = fname = os.path.join(self.out_dir, f'{record_name}.mcap')
+            move_with_suffix(self.fname)
             self.fhandle = fhandle = open(fname, "wb")
             self.writer = writer = Writer(fhandle)
             writer.start()

@@ -1,7 +1,7 @@
 import os
 import zipfile
 from .base import BaseRecorder
-from ...util import format_epoch_time
+from ...util import format_epoch_time, move_with_suffix
 
 MB = 1024 * 1024
 
@@ -31,6 +31,7 @@ class ZipRecorder(BaseRecorder):
         if self.writer is None:
             self.writer = {}
             self.recording_dir = os.path.join(self.out_dir, record_name)
+            move_with_suffix(self.recording_dir)
             os.makedirs(self.recording_dir, exist_ok=True)
         return self
 

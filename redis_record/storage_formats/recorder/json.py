@@ -1,6 +1,7 @@
 import os
 import orjson
 from .base import BaseRecorder
+from ...util import move_with_suffix
 
 
 
@@ -19,6 +20,7 @@ class JsonRecorder(BaseRecorder):
     def ensure_writer(self, name):
         self.close()
         self.recording_dir = os.path.join(self.out_dir, name)
+        move_with_suffix(self.recording_dir)
         os.makedirs(self.recording_dir, exist_ok=True)
 
     def ensure_channel(self, sid):

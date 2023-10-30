@@ -101,3 +101,15 @@ def get_recording_filename(name, recording_dir=RECORDING_DIR):
     if os.path.isfile(name):
         return name
     return os.path.join(recording_dir, f'{name}.mcap')
+
+
+def move_with_suffix(src):
+    if os.path.exists(src):
+        base, ext = os.path.splitext(src)
+        i = 1
+        dest = f"{base}_{i}{ext}"
+        while os.path.exists(dest):
+            i += 1
+            dest = f"{base}_{i}{ext}"
+        print("\nMOVING", src, 'to', dest)
+        os.rename(src, dest)

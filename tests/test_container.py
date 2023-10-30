@@ -101,6 +101,12 @@ def record_dir():
         # shutil.rmtree(RECORDING_DIR)
         pass
 
+
+def test_reader_writer():
+    pass
+
+
+
 def test_record(containers, record_commands, record_dir):
     time.sleep(2)
     record_name = "asdf"
@@ -113,10 +119,12 @@ def test_record(containers, record_commands, record_dir):
     for i in range(50):
         x, t = record_commands.add_fake(stream_id, i)
         data.append(x)
-        print(t)
+        print(i, t, x)
+        time.sleep(0.001)
     print("stop")
-    record_commands.stop()
-    time.sleep(3)
+    time.sleep(0.01)
+    print(record_commands.stop())
+    time.sleep(5)
 
     print("replay")
     t0 = time.time()
@@ -136,11 +144,12 @@ def read_until(record_commands, stream_id, t0, n):
     cursor = {stream_id: f'{t0*1000:.0f}-0'}
     while True:
         x, cursor = record_commands.read(cursor)
+        time.sleep(0.0005)
         if not x:
             print("no data", cursor, len(data2))
             time.sleep(1)
         for sid, xs in x:
-            if not x:
+            if not xs:
                 print("no data in", sid, len(data2))
                 time.sleep(1)
             for t, d in xs:
