@@ -1,6 +1,10 @@
 import time
 import datetime
+import asyncio
+import logging
 
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 class Sync:
     def __init__(self, speed_fudge=1, warn_above=10):
@@ -30,15 +34,28 @@ class Sync:
     def sync(self, timestamp):
         delay = self.wait_time(timestamp)
         if delay:
-            if delay > self.warn_above:
-                print(
-                    f"\n\nWarning: sleeping for {delay:.3f} seconds. \n"
-                    f"Simulating {datetime.datetime.fromtimestamp(self.tpub).strftime('%H:%M:%S.%f')} - {datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S.%f')}")
+            self._warn(timestamp, delay)
             time.sleep(delay / self.speed_fudge)
         
         # update for next iteration
         self.tpub = timestamp
         self.tproc = time.time()
+
+    async def sync_async(self, timestamp):
+        delay = self.wait_time(timestamp)
+        if delay:
+            self._warn(timestamp, delay)
+            await asyncio.sleep(delay / self.speed_fudge)
+        
+        # update for next iteration
+        self.tpub = timestamp
+        self.tproc = time.time()
+
+    def _warn(self, timestamp, delay):
+        if delay > self.warn_above:
+            log.warning(
+                f"Sleeping for {delay:.3f} seconds. \n"
+                f"Simulating {datetime.datetime.fromtimestamp(self.tpub).strftime('%H:%M:%S.%f')} - {datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S.%f')}")
 
 
 class Clock(Sync):
@@ -52,6 +69,9 @@ class Clock(Sync):
     
     def sync(self, timestamp=None):
         return super().sync(self.tpub + self.delta)
+    
+    async def sync_async(self, timestamp=None):
+        return await super().sync_async(self.tpub + self.delta)
     
     def nowait_sync(self, timestamp=None):
         if not self.wait_time(timestamp):
