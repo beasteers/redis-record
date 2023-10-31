@@ -1,4 +1,10 @@
 
+import logging
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+
+
 
 class BaseRecorder:
     def __init__(self, out_dir='.', schema=None):

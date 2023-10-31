@@ -165,9 +165,14 @@ def record(
             cmd.stop_recording(r)
 
 
+
 def cli():
+    import logging
+    from tqdm.contrib.logging import logging_redirect_tqdm
     import fire
-    fire.Fire(record)
+    logging.basicConfig(level=logging.DEBUG)
+    with logging_redirect_tqdm():
+        fire.Fire(record)
 
 if __name__ == '__main__':
     from pyinstrument import Profiler

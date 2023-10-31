@@ -3,12 +3,17 @@
 import os
 import time
 import json
-import tqdm
 import base64
 from mcap.writer import Writer
 from .base import BaseRecorder
 from ...config import DEFAULT_CHANNEL
 from ...util import move_with_suffix
+
+import logging
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+
 
 class MCAPRecorder(BaseRecorder):
     def __init__(self, schema=None, out_dir='.'):
@@ -35,7 +40,7 @@ class MCAPRecorder(BaseRecorder):
             self.fhandle = fhandle = open(fname, "wb")
             self.writer = writer = Writer(fhandle)
             writer.start()
-            tqdm.tqdm.write(f"Opening writer {fname}")
+            log.info("Created Recorder: %s", fname)
 
             # https://mcap.dev/docs/python/mcap-apidoc/mcap.well_known#mcap.well_known.MessageEncoding
             kw = {"properties": self.schema} if self.schema else {}
@@ -48,7 +53,7 @@ class MCAPRecorder(BaseRecorder):
 
     def ensure_channel(self, channel=DEFAULT_CHANNEL):
         if channel not in self.channel_ids:
-            tqdm.tqdm.write(f"opening channel {channel}")
+            log.debug("Opening Recorder Channel: %s %s", self.fname, channel)
             self.channel_ids[channel] = self.writer.register_channel(
                 schema_id=self.schema_id,
                 topic=channel,
@@ -67,11 +72,11 @@ class MCAPRecorder(BaseRecorder):
 
     def close(self):
         if self.writer is not None:
-            tqdm.tqdm.write(f"closing {self.fname}")
             self.writer.finish()
             self.fhandle.close()
             self.writer = self.fhandle = None
             self.channel_ids.clear()
+            log.info("Closed Recorder: %s", self.fname)
 
 
 

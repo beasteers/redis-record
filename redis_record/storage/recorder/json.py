@@ -3,6 +3,10 @@ import orjson
 from .base import BaseRecorder
 from ...util import move_with_suffix
 
+import logging
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 
 class JsonRecorder(BaseRecorder):

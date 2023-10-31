@@ -3,6 +3,12 @@ import zipfile
 from .base import BaseRecorder
 from ...util import format_epoch_time, move_with_suffix
 
+import logging
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+
+
 MB = 1024 * 1024
 
 class ZipRecorder(BaseRecorder):
@@ -24,6 +30,7 @@ class ZipRecorder(BaseRecorder):
         if self.writer:
             for _, w in self.writer.items():
                 w.close()
+            log.info("Closed Recorder: %s", self.recording_dir)
         self.writer = None
 
     def ensure_writer(self, record_name, force=False):
@@ -34,6 +41,7 @@ class ZipRecorder(BaseRecorder):
             self.recording_dir = os.path.join(self.out_dir, record_name)
             move_with_suffix(self.recording_dir)
             os.makedirs(self.recording_dir, exist_ok=True)
+            log.info("Created Recorder: %s", self.recording_dir)
         return self
 
     def ensure_channel(self, channel):

@@ -4,11 +4,17 @@ import base64
 from mcap.reader import make_reader
 from redis_record.config import RECORDING_DIR
 
+import logging
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+
 
 class MCAPPlayer:
     def __init__(self, name, recording_dir=RECORDING_DIR, subset=None) -> None:
         self.path = name if os.path.isfile(name) else os.path.join(recording_dir, f'{name}.mcap')
         self.subset = subset
+        log.info("Created Player: %s - streams: %s", self.path, self.subset or 'all')
 
     def __enter__(self):
         self.fh = open(self.path, "rb")
@@ -17,7 +23,11 @@ class MCAPPlayer:
         return self
 
     def __exit__(self, exc_type, exc_value, trace):
+        self.close()
+
+    def close(self):
         self.fh.close()
+        log.info("Closed Player: %s - streams: %s", self.path, self.subset or 'all')
 
     def __iter__(self):
         yield from self.iter_messages()

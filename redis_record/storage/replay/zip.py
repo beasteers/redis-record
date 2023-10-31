@@ -10,7 +10,7 @@ from redis_record.config import RECORDING_DIR
 import logging
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 
 class ZipPlayer:
@@ -24,6 +24,7 @@ class ZipPlayer:
         self.file_end_timestamps = {}
         self.queue = queue.PriorityQueue()
         self.raw_timestamp = raw_timestamp
+        log.info("Created Player: %s - streams: %s", self.recording_dir, self.subset or 'all')
 
         self._load_file_index()
         for stream_id in self.file_index:
@@ -82,6 +83,7 @@ class ZipPlayer:
         for zf in self.zipfh.values():
             zf.close()
         self.zipfh.clear()
+        log.info("Closed Player: %s - streams: %s", self.recording_dir, self.subset or 'all')
 
     def _get_time_range_from_file(self, fname):
         t0, t1 = fname.split(os.sep)[-1].removesuffix('.zip').split('_')
