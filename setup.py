@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='redis_record',
-    version='0.0.3',
+    version='0.0.4',
     description='redis streams recordings',
     long_description=open('README.md').read().strip(),
     long_description_content_type='text/markdown',
