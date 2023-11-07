@@ -3,6 +3,10 @@ import os
 import datetime
 from .config import *
 
+import logging
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+
 
 def maybe_encode(s: str|bytes, encoding='utf-8'):
     '''If the input is str, encode as utf-8 (or other).'''
@@ -103,13 +107,19 @@ def get_recording_filename(name, recording_dir=RECORDING_DIR):
     return os.path.join(recording_dir, f'{name}.mcap')
 
 
-def move_with_suffix(src):
+def move_with_suffix(src, prefix=None, suffix=None, has_ext=None):
     if os.path.exists(src):
-        base, ext = os.path.splitext(src)
+        has_ext = os.path.isfile(src) if has_ext is None else has_ext
+        if has_ext:
+            base, ext = os.path.splitext(src)
+        else:
+            base, ext = src, ''
+        base = f"{prefix or ''}{base}{suffix or ''}"
+
         i = 1
         dest = f"{base}_{i}{ext}"
         while os.path.exists(dest):
             i += 1
             dest = f"{base}_{i}{ext}"
-        print("\nMOVING", src, 'to', dest)
+        log.info("MOVING %s to %s", src, dest)
         os.rename(src, dest)

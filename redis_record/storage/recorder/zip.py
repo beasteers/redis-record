@@ -39,7 +39,6 @@ class ZipRecorder(BaseRecorder):
         if self.writer is None:
             self.writer = {}
             self.recording_dir = os.path.join(self.out_dir, record_name)
-            move_with_suffix(self.recording_dir)
             os.makedirs(self.recording_dir, exist_ok=True)
             log.info("Created Recorder: %s", self.recording_dir)
         return self
@@ -47,6 +46,7 @@ class ZipRecorder(BaseRecorder):
     def ensure_channel(self, channel):
         if channel not in self.writer:
             out_dir = os.path.join(self.recording_dir, channel)
+            move_with_suffix(out_dir, prefix='_')
             self.writer[channel] = ZipWriter(out_dir, self.max_len, self.max_size)
 
 
